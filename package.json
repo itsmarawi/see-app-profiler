@@ -1,0 +1,36 @@
+{
+  "name": "see-app-profiler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/see-app-profiler.js",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "rimraf dist && webpack --config config/webpack.prod.config.js --progress --profile --bail",
+    "postbuild": "dts-bundle-generator --config config/dts-generator.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itsmarawi/see-app-profiler.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itsmarawi/see-app-profiler/issues"
+  },
+  "homepage": "https://github.com/itsmarawi/see-app-profiler#readme",
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.15.0",
+    "dts-bundle-generator": "^5.9.0",
+    "file-loader": "^6.2.0",
+    "json-loader": "^0.5.7",
+    "raw-loader": "^4.0.2",
+    "rimraf": "^3.0.2",
+    "ts-json-schema-generator": "^0.95.0",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.3",
+    "webpack": "^5.55.1",
+    "webpack-bundle-analyzer": "^4.4.2",
+    "webpack-cli": "^4.8.0",
+    "webpack-merge": "^5.8.0"
+  }
+}
