@@ -1,1 +1,2 @@
-export class Profiler {}
+export * from './profiler';
+export * from './interfaces'
