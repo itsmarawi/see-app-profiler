@@ -13,7 +13,7 @@ const config = {
     },
     entries: [
         {
-            filePath: '../src/index.ts',
+            filePath: '../src/profiler.ts',
             outFile: '../dist/'+ artifacts.profiler + '.d.ts',     
             output: commonOutputParams,
         },

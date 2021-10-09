@@ -5,7 +5,7 @@ const artifacts = require('./artifacts');
 
 module.exports = {
     entry: {
-        [artifacts.profiler]: './src/index.ts',
+        [artifacts.profiler]: './src/profiler.ts',
     },
     resolve: {
         extensions: ['.ts', '.js'],

@@ -283,7 +283,7 @@ export abstract class Profiler<P extends EveryProfile> {
             }${profile.lastName[0].toUpperCase()
             }${String(this.hashName(profile.firstName.toUpperCase()
                  + profile.middleName[0].toUpperCase() 
-                + profile.lastName.toUpperCase() + profile.birthDate) + profile.kind)
+                + profile.lastName.toUpperCase() + profile.birthDate + profile.kind))
                 .padEnd(mask.length, mask)
             }${genderPart}${birthMatch[1] + birthMatch[2] + birthMatch[3].substr(-2)}`;
         return profile;
