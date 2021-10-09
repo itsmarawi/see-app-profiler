@@ -265,7 +265,7 @@ export abstract class Profiler<P extends EveryProfile> {
         }
     }
     
-    private encodeCodeName<P1 extends IIndividualProfile & {kind: string}>(profile: P1) {
+    protected encodeCodeName<P1 extends IIndividualProfile & {kind: string}>(profile: P1) {
         profile.firstName = String(profile.firstName).trim();
         if (!profile.firstName) throw new Error('First name is required');
         profile.middleName = String(profile.middleName).trim();

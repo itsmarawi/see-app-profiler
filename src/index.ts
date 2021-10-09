@@ -1,2 +1,2 @@
-export * from './profiler';
-export * from './interfaces'
+export * from 'profiler';
+export * from 'interfaces'
