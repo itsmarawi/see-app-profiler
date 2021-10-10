@@ -107,7 +107,8 @@ export abstract class Profiler<P extends EveryProfile> {
                 const activationKey = NaclUtil.encodeUTF8(decoded).trim();
                 //[Org:9][ProfileCodeName:22][ChiefCodeName:22]ACTIVATE:[ROLE:#]
                 const activationInfo = /^(?<Org>.{9})(?<ProfileCodeName>.{22})(?<ChiefCodeName>.{22})ACTIVATE:(?<Role>.*)/.exec(activationKey);
-                const supCodeName = profile.supervisor;
+                const supCodeName = typeof profile.supervisor == 'string' 
+                    ? profile.supervisor : profile.supervisor.code;
                 if (!activationInfo
                     || activationInfo.groups && (profile.organization !== activationInfo.groups['Org']
                     || profile.code !== activationInfo.groups['ProfileCodeName']
@@ -209,7 +210,7 @@ export abstract class Profiler<P extends EveryProfile> {
         let supervisor: IExecutiveProfile; 
         if (profile.kind == 'executive' && profile.supervisor) {
             supervisor = typeof profile.supervisor == 'string' 
-                ? await this.findOne(orgCode, profileId) as IExecutiveProfile 
+                ? await this.findOneByCode(profile.supervisor) as IExecutiveProfile 
                 : profile.supervisor;
         } else {
             throw new ProfilerException('invalid profile', 400);
@@ -238,10 +239,15 @@ export abstract class Profiler<P extends EveryProfile> {
     }
     async getEncoderActivation(orgCode: string, profileId: string, executiveOrg: string): Promise<string> {
         const profile = await this.findOne(orgCode, profileId);
-        if (profile.kind != 'encoder' || typeof profile.executive !== 'object') {
+        
+        if (profile.kind != 'encoder') {
             throw new ProfilerException('invalid profile id', 400);
         }
-        
+        if (typeof profile.executive == 'string') {
+            profile.executive = await this.findOneByCode(profile.executive) as IExecutiveProfile;
+        }
+        if (!profile.executive) throw new ProfilerException('invalid profile executive', 400);
+
         if (await this.isOrgPartOfOrg(typeof profile.organization == 'object' 
             ? profile.organization.code : profile.organization, executiveOrg) == false) {
             throw new ProfilerException('Cannot activate across-organization', 400);
