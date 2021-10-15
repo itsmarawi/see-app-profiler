@@ -298,7 +298,7 @@ export abstract class Profiler<P extends EveryProfile> {
             throw new ProfilerException('No Keys', 424);
         }
         let profileKey = orgCode + profile.code +  encoder.code + encoder.executive.code + chief.code 
-            + 'PROFILED:' + profile.kind + String(extraInfo);
+            + 'PROFILED:' + profile.kind  + ':' + String(extraInfo);
         let encrypted = '=';
         do {
             encrypted = NaclUtil.encodeBase64(
@@ -308,8 +308,7 @@ export abstract class Profiler<P extends EveryProfile> {
         } while (!encrypted.endsWith('='));
         return encrypted;
     }
-    async validateProrile(profileKey: string, orgCode: string) {
-        const authKey = await this.getPubKey('encoder', orgCode);
+    async validateProrile(profileKey: string, authKey: string) {
         if (authKey) {
             try {
                 const pubKey = NaclUtil.decodeBase64(authKey);
@@ -320,7 +319,7 @@ export abstract class Profiler<P extends EveryProfile> {
                 const profiledKey = NaclUtil.encodeUTF8(decoded).trim();
                 //[organization:9][code:22][encoder:22][executive:22][chief:22]PROFILED:[role:#]:[info]
                 const profileInfo = /^(?<organization>.{9})(?<code>.{22})(?<encoder>.{22})(?<executive>.{22})(?<chief>.{22})PROFILED:(?<role>[^:]+):(?<info>.*)/.exec(profiledKey);
-                if (!profileInfo || !profileInfo.groups || (orgCode !== profileInfo.groups['Org'])) {
+                if (!profileInfo || !profileInfo.groups) {
                     throw new ProfilerException('Invalid Profile', 403);
                 }
                 return profileInfo.groups;
