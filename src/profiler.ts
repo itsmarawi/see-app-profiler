@@ -308,7 +308,7 @@ export abstract class Profiler<P extends EveryProfile> {
         } while (!encrypted.endsWith('='));
         return encrypted;
     }
-    async validateProrile(profileKey: string, authKey: string) {
+    validateProrile(profileKey: string, authKey: string) {
         if (authKey) {
             try {
                 const pubKey = NaclUtil.decodeBase64(authKey);
