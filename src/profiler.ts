@@ -376,7 +376,7 @@ export abstract class Profiler<P extends EveryProfile> {
         return profile;
     }
     protected decodeCodeName(codeName: string) {
-        const profileInfo = /^(?<initials>[A-Z]{3})(?<hash>[-0-9]{12})(?<gender>[01])(?<bmonth>\d{2})(?<bday>\d{2})(?<byear>\d{4})/.exec(codeName);
+        const profileInfo = /^(?<initials>[A-Z]{3})(?<hash>[-0-9]{12})(?<gender>[01])(?<bmonth>\d{2})(?<bday>\d{2})(?<byear>\d{2})/.exec(codeName);
         if (!profileInfo || !profileInfo.groups) {
             throw new ProfilerException('Invalid Code Name', 403);
         }
