@@ -318,11 +318,15 @@ export abstract class Profiler<P extends EveryProfile> {
                 if (!decoded) throw new ProfilerException('permission-denied', 403);
                 const profiledKey = NaclUtil.encodeUTF8(decoded).trim();
                 //[organization:9][code:22][encoder:22][executive:22][chief:22]PROFILED:[role:#]:[info]
-                const profileInfo = /^(?<organization>.{9})(?<code>.{22})(?<encoder>.{22})(?<executive>.{22})(?<chief>.{22})PROFILED:(?<role>[^:]+):(?<info>.*)/.exec(profiledKey);
+                const profileInfo = /^(?<organization>.{9})(?<code>.{22})(?<encoder>.{22})(?<executive>.{22})(?<chief>.{22})PROFILED:(?<role>[^:]+):(?<info>.*)/
+                    .exec(profiledKey);
                 if (!profileInfo || !profileInfo.groups) {
                     throw new ProfilerException('Invalid Profile', 403);
                 }
-                return profileInfo.groups;
+                return profileInfo.groups as {
+                    organization: string, code: string, encoder: string, executive: string, chief: string, 
+                    role: string, extra: string
+                };
             } catch (error) {
                 throw new ProfilerException('invalid-activation', 403);
             }
@@ -370,6 +374,19 @@ export abstract class Profiler<P extends EveryProfile> {
                 birthMatch[1] + birthMatch[2] + birthMatch[3].substr(-2)
             }`;
         return profile;
+    }
+    protected decodeCodeName(codeName: string) {
+        const profileInfo = /^(?<initials>[A-Z]{3})(?<hash>[-0-9]{12})(?<gender>[01])(?<bmonth>\d{2})(?<bday>\d{2})(?<byear>\d{4})/.exec(codeName);
+        if (!profileInfo || !profileInfo.groups) {
+            throw new ProfilerException('Invalid Code Name', 403);
+        }
+        const result = profileInfo.groups;
+        return {
+            initials: result.initials,
+            hash: result.hash,
+            gender: result.gender == '1' ? 'Male' : 'Female',
+            birthDate: `${result.bmonth}-${result.bday}-${result.byear}`
+        };
     }
     private hashName(name: string) {
         let hash = 0;
