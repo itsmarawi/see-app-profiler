@@ -10,8 +10,8 @@ export abstract class Profiler<P extends EveryProfile> {
     //{ Abstract Methods
     abstract getPubKey(kind: 'admin' | 'chief' | 'encoder', orgCode?: string): Promise<string>;
     abstract getPrivKey(kind: 'chief' | 'encoder', orgCode?: string): Promise<string>;
-    abstract findOne(orgCode: string, profileId: string):Promise<P>;
-    abstract findOneByCode(code: string):Promise<P>;
+    abstract findOne(orgCode: string, profileId: string): Promise<P>;
+    abstract findOneByCode(code: string): Promise<P>;
     abstract update(id: string, newItem: P): Promise<P>;
     abstract isOrgPartOfOrg(org: string, partentOrg: string): Promise<boolean>
     //} Abstract Methods
@@ -28,7 +28,7 @@ export abstract class Profiler<P extends EveryProfile> {
         }
         else {
             throw new ProfilerException('invalid-profile', 400);
-        }        
+        }
         profile.activation = activation;
         if (profile.id) {
             await this.update(profile.id, profile);
@@ -71,11 +71,11 @@ export abstract class Profiler<P extends EveryProfile> {
                 const activationKey = NaclUtil.encodeUTF8(decoded).trim();
                 //[Org:9][ProfileCodeName:22]ACTIVATE:[ROLE:#]
                 const activationInfo = /^(?<Org>.{9})(?<ProfileCodeName>.{22})ACTIVATE:(?<Role>.*)/.exec(activationKey);
-                if (!activationInfo || 
+                if (!activationInfo ||
                     activationInfo.groups && (profile.organization !== activationInfo.groups['Org']
-                    || profile.code !== activationInfo.groups['ProfileCodeName']
-                    || (profile.kind == 'executive' && profile.role !== 'chief')
-                    || (profile.kind == 'executive' && profile.role !== activationInfo.groups['Role']))) {
+                        || profile.code !== activationInfo.groups['ProfileCodeName']
+                        || (profile.kind == 'executive' && profile.role !== 'chief')
+                        || (profile.kind == 'executive' && profile.role !== activationInfo.groups['Role']))) {
                     throw new ProfilerException('permission-denied', 403);
                 }
             } catch (error) {
@@ -87,13 +87,13 @@ export abstract class Profiler<P extends EveryProfile> {
         if (!profile.supervisor) {
             throw new ProfilerException('permission-denied', 403);
         }
-        const chief = typeof profile.supervisor == 'string' 
+        const chief = typeof profile.supervisor == 'string'
             ? await this.findOneByCode(profile.supervisor) as IExecutiveProfile
             : profile.supervisor;
         if (chief.role != 'chief') {
             throw new ProfilerException('invalid-supervisor', 403);
         }
-        const orgCode = typeof chief.organization == 'string' 
+        const orgCode = typeof chief.organization == 'string'
             ? chief.organization : chief.organization.code;
         const authKey = await this.getPubKey('chief', orgCode);
         if (authKey) {
@@ -107,13 +107,13 @@ export abstract class Profiler<P extends EveryProfile> {
                 const activationKey = NaclUtil.encodeUTF8(decoded).trim();
                 //[Org:9][ProfileCodeName:22][ChiefCodeName:22]ACTIVATE:[ROLE:#]
                 const activationInfo = /^(?<Org>.{9})(?<ProfileCodeName>.{22})(?<ChiefCodeName>.{22})ACTIVATE:(?<Role>.*)/.exec(activationKey);
-                const supCodeName = typeof profile.supervisor == 'string' 
+                const supCodeName = typeof profile.supervisor == 'string'
                     ? profile.supervisor : profile.supervisor.code;
                 if (!activationInfo
                     || activationInfo.groups && (profile.organization !== activationInfo.groups['Org']
-                    || profile.code !== activationInfo.groups['ProfileCodeName']
-                    || (profile.role == 'chief')
-                    || (supCodeName !== activationInfo.groups['ChiefCodeName']))) {
+                        || profile.code !== activationInfo.groups['ProfileCodeName']
+                        || (profile.role == 'chief')
+                        || (supCodeName !== activationInfo.groups['ChiefCodeName']))) {
                     throw new ProfilerException('permission-denied', 403);
                 }
                 profile.role = this.validateRole(activationInfo.groups && activationInfo.groups['Role']);
@@ -128,19 +128,19 @@ export abstract class Profiler<P extends EveryProfile> {
         if (!profile.executive) {
             throw new ProfilerException('permission-denied', 403);
         }
-        const headProfiler = typeof profile.executive == 'string' 
-            ? await this.findOneByCode(profile.executive) as IExecutiveProfile 
+        const headProfiler = typeof profile.executive == 'string'
+            ? await this.findOneByCode(profile.executive) as IExecutiveProfile
             : profile.executive;
         if ((typeof headProfiler.organization == 'string' && headProfiler.organization != profile.organization)) {
             throw new ProfilerException('invalid-executive', 403);
         }
-        const chief = typeof headProfiler.supervisor == 'string' 
+        const chief = typeof headProfiler.supervisor == 'string'
             ? await this.findOneByCode(headProfiler.supervisor) as IExecutiveProfile
             : headProfiler.supervisor;
         if (!chief || chief.role != 'chief') {
             throw new ProfilerException('invalid-supervisor', 403);
         }
-        const orgCode = typeof chief.organization == 'string' 
+        const orgCode = typeof chief.organization == 'string'
             ? chief.organization : chief.organization.code;
         const authKey = await this.getPubKey('encoder', orgCode);
         if (authKey) {
@@ -157,9 +157,9 @@ export abstract class Profiler<P extends EveryProfile> {
                 const execCodeName = typeof profile.executive == 'string' ? profile.executive : profile.executive?.code;
                 if (!activationInfo
                     || activationInfo.groups && (profile.organization !== activationInfo.groups['Org']
-                    || profile.code !== activationInfo.groups['ProfileCodeName']
-                    || profile.kind !== activationInfo.groups['Role']
-                    || (execCodeName !== activationInfo.groups['ExecutiveCodeName']))) {
+                        || profile.code !== activationInfo.groups['ProfileCodeName']
+                        || profile.kind !== activationInfo.groups['Role']
+                        || (execCodeName !== activationInfo.groups['ExecutiveCodeName']))) {
                     throw new ProfilerException('permission-denied', 403);
                 }
             } catch (error) {
@@ -176,7 +176,7 @@ export abstract class Profiler<P extends EveryProfile> {
         if (profile.kind != 'admin') {
             throw new ProfilerException('invalid profile', 400);
         }
-        let activationKey =  profile.code + 'ACTIVATE:administrator';
+        let activationKey = profile.code + 'ACTIVATE:administrator';
         let encrypted = '=';
         do {
             encrypted = NaclUtil.encodeBase64(
@@ -207,26 +207,26 @@ export abstract class Profiler<P extends EveryProfile> {
     }
     async getExecutiveActivation(orgCode: string, profileId: string, chiefOrg: string): Promise<string> {
         const profile = await this.findOne(orgCode, profileId);
-        let supervisor: IExecutiveProfile; 
+        let supervisor: IExecutiveProfile;
         if (profile.kind == 'executive' && profile.supervisor) {
-            supervisor = typeof profile.supervisor == 'string' 
-                ? await this.findOneByCode(profile.supervisor) as IExecutiveProfile 
+            supervisor = typeof profile.supervisor == 'string'
+                ? await this.findOneByCode(profile.supervisor) as IExecutiveProfile
                 : profile.supervisor;
         } else {
             throw new ProfilerException('invalid profile', 400);
         }
-        if (typeof profile.organization == 'object' && 
-            (profile.organization.parentOrgCode && (profile.organization.parentOrgCode !== supervisor.organization 
+        if (typeof profile.organization == 'object' &&
+            (profile.organization.parentOrgCode && (profile.organization.parentOrgCode !== supervisor.organization
                 || profile.organization.parentOrgCode !== chiefOrg)
                 || (!profile.organization.parentOrgCode && profile.organization.code !== chiefOrg))) {
             throw new ProfilerException('Cannot activate across-organization', 400);
         }
         const secretKey = await this.getPrivKey('chief', chiefOrg);
-        
+
         if (!secretKey) {
             throw new ProfilerException('No Keys', 424);
         }
-        
+
         let activationKey = orgCode + profile.code + supervisor.code + 'ACTIVATE:' + profile.role;
         let encrypted = '=';
         do {
@@ -239,7 +239,7 @@ export abstract class Profiler<P extends EveryProfile> {
     }
     async getEncoderActivation(orgCode: string, profileId: string, executiveOrg: string): Promise<string> {
         const profile = await this.findOne(orgCode, profileId);
-        
+
         if (profile.kind != 'encoder') {
             throw new ProfilerException('invalid profile id', 400);
         }
@@ -248,17 +248,17 @@ export abstract class Profiler<P extends EveryProfile> {
         }
         if (!profile.executive) throw new ProfilerException('invalid profile executive', 400);
 
-        if (await this.isOrgPartOfOrg(typeof profile.organization == 'object' 
+        if (await this.isOrgPartOfOrg(typeof profile.organization == 'object'
             ? profile.organization.code : profile.organization, executiveOrg) == false) {
             throw new ProfilerException('Cannot activate across-organization', 400);
         }
-        const chief = typeof profile.executive.supervisor == 'string' 
+        const chief = typeof profile.executive.supervisor == 'string'
             ? await this.findOneByCode(profile.executive.supervisor) as IExecutiveProfile
             : profile.executive.supervisor;
         if (!chief || chief.role != 'chief') {
             throw new ProfilerException('invalid-supervisor', 403);
         }
-        const chiefOrgCode = typeof chief.organization == 'string' 
+        const chiefOrgCode = typeof chief.organization == 'string'
             ? chief.organization : chief.organization.code;
         const secretKey = await this.getPrivKey('encoder', chiefOrgCode);
         if (!secretKey) {
@@ -276,7 +276,40 @@ export abstract class Profiler<P extends EveryProfile> {
     }
     //} Activation Generation
     //{ Profilling
-    async generateProfile(profileCode: string, encoderCode:string, extraInfo?:string): Promise<string> {
+    async encodeInfo(info: string, chiefOrg: string) {
+        const secretKey = await this.getPrivKey('encoder', chiefOrg);
+        if (!secretKey) {
+            throw new ProfilerException('No Keys', 424);
+        }
+        let profileKey = info;
+        let encrypted = '=';
+        do {
+            encrypted = NaclUtil.encodeBase64(
+                nacl.sign(NaclUtil.decodeUTF8(profileKey), NaclUtil.decodeBase64(secretKey))
+            );
+            profileKey += ' ';
+        } while (!encrypted.endsWith('='));
+        return encrypted;
+    }
+    async decodeInfo(encrypted: string, authKey?: string, orgCode?: string) {
+        if (!authKey) {
+            authKey = await this.getPubKey('encoder', orgCode);
+        }
+        if (!authKey) {
+            throw new ProfilerException('no-keys', 417);
+        }
+        try {
+            const pubKey = NaclUtil.decodeBase64(authKey);
+            const decoded = nacl.sign.open(
+                NaclUtil.decodeBase64(encrypted),
+                pubKey);
+            if (!decoded) throw new ProfilerException('permission-denied', 403);
+            return decoded;
+        } catch (error) {
+            throw new ProfilerException('invalid-activation', 403);
+        }
+    }
+    async generateProfile(profileCode: string, encoderCode: string, extraInfo?: string): Promise<string> {
         const profile = await this.findOneByCode(profileCode);
         const encoder = await this.findOneByCode(encoderCode);
         if (encoder.kind != 'encoder' || typeof encoder.executive !== 'object') {
@@ -284,21 +317,21 @@ export abstract class Profiler<P extends EveryProfile> {
         }
         const orgCode = typeof encoder.organization == 'string' ?
             encoder.organization : encoder.organization.code;
-        
-        const chief = typeof encoder.executive.supervisor == 'string' 
+
+        const chief = typeof encoder.executive.supervisor == 'string'
             ? await this.findOneByCode(encoder.executive.supervisor) as IExecutiveProfile
             : encoder.executive.supervisor;
         if (!chief || chief.role != 'chief') {
             throw new ProfilerException('invalid-supervisor', 403);
         }
-        const chiefOrgCode = typeof chief.organization == 'string' 
+        const chiefOrgCode = typeof chief.organization == 'string'
             ? chief.organization : chief.organization.code;
         const secretKey = await this.getPrivKey('encoder', chiefOrgCode);
         if (!secretKey) {
             throw new ProfilerException('No Keys', 424);
         }
-        let profileKey = orgCode + profile.code +  encoder.code + encoder.executive.code + chief.code 
-            + 'PROFILED:' + profile.kind  + ':' + String(extraInfo);
+        let profileKey = orgCode + profile.code + encoder.code + encoder.executive.code + chief.code
+            + 'PROFILED:' + profile.kind + ':' + String(extraInfo);
         let encrypted = '=';
         do {
             encrypted = NaclUtil.encodeBase64(
@@ -324,7 +357,7 @@ export abstract class Profiler<P extends EveryProfile> {
                     throw new ProfilerException('Invalid Profile', 403);
                 }
                 return profileInfo.groups as {
-                    organization: string, code: string, encoder: string, executive: string, chief: string, 
+                    organization: string, code: string, encoder: string, executive: string, chief: string,
                     role: string, extra: string
                 };
             } catch (error) {
@@ -336,42 +369,40 @@ export abstract class Profiler<P extends EveryProfile> {
     }
     //} Profilling
     //{ Helper Methods
-    private validateRole(role?:string) {
-        switch(role) {
-            case 'chief': case 'Chief' : case 'CHIEF':
+    private validateRole(role?: string) {
+        switch (role) {
+            case 'chief': case 'Chief': case 'CHIEF':
                 return 'chief';
-            case 'head-encoder': case 'Head-Encoder' : case 'HEAD-ENCODER':
+            case 'head-encoder': case 'Head-Encoder': case 'HEAD-ENCODER':
                 return 'head-encoder';
             default:
-                return 'manager';    
+                return 'manager';
         }
     }
-    protected encodeCodeName<P1 extends IIndividualProfile & {kind: string}>(profile: P1) {
+    protected encodeCodeName<P1 extends IIndividualProfile & { kind: string }>(profile: P1) {
         profile.firstName = String(profile.firstName).trim();
         if (!profile.firstName) throw new Error('First name is required');
         profile.middleName = String(profile.middleName).trim();
         if (!profile.middleName) throw new Error('Middle First name is required');
         profile.lastName = String(profile.lastName).trim();
         if (!profile.lastName) throw new Error('Last name is required');
-        
+
         const birthDateExp = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/;
         const birthMatch = birthDateExp.exec(profile.birthDate);
         if (birthMatch == null) throw new Error('Invalid Birthdate');
         const mask = '0000' + birthMatch[1] + birthMatch[2] + birthMatch[3];
-        const genderPart = profile.gender == 'Male' ? '1': '0';
-        profile.code = `${
-            profile.firstName[0].toUpperCase()
+        const genderPart = profile.gender == 'Male' ? '1' : '0';
+        profile.code = `${profile.firstName[0].toUpperCase()
             }${profile.middleName[0].toUpperCase()
             }${profile.lastName[0].toUpperCase()
             }${String(this.hashName(
                 profile.firstName.toUpperCase()
-                    + profile.middleName[0].toUpperCase() 
-                    + profile.lastName.toUpperCase() 
-                    + profile.birthDate 
-                    + profile.kind
-                )).padEnd(mask.length, mask)
-            }${genderPart}${
-                birthMatch[1] + birthMatch[2] + birthMatch[3].substr(-2)
+                + profile.middleName[0].toUpperCase()
+                + profile.lastName.toUpperCase()
+                + profile.birthDate
+                + profile.kind
+            )).padEnd(mask.length, mask)
+            }${genderPart}${birthMatch[1] + birthMatch[2] + birthMatch[3].substr(-2)
             }`;
         return profile;
     }
