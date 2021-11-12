@@ -56,6 +56,8 @@ export abstract class Profiler<P extends EveryProfile> {
             } catch (error) {
                 throw new ProfilerException('invalid-activation', 403);
             }
+        } else {
+            throw new ProfilerException('no-activation-pub-keys', 417);
         }
     }
     private async validateChiefActivation(activation: string, profile: IExecutiveProfile) {
@@ -81,6 +83,8 @@ export abstract class Profiler<P extends EveryProfile> {
             } catch (error) {
                 throw new ProfilerException('invalid-activation:' + error, 403);
             }
+        } else {
+            throw new ProfilerException('no-activation-pub-keys', 417);
         }
     }
     private async validateExecutiveActivation(activation: string, profile: IExecutiveProfile) {
