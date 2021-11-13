@@ -308,7 +308,7 @@ export abstract class Profiler<P extends EveryProfile> {
                 NaclUtil.decodeBase64(encrypted),
                 pubKey);
             if (!decoded) throw new ProfilerException('permission-denied', 403);
-            return decoded;
+            return NaclUtil.encodeBase64(decoded);
         } catch (error) {
             throw new ProfilerException('invalid-activation', 403);
         }
