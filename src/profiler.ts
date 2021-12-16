@@ -354,8 +354,8 @@ export abstract class Profiler<P extends EveryProfile> {
                     pubKey);
                 if (!decoded) throw new ProfilerException('permission-denied', 403);
                 const profiledKey = NaclUtil.encodeUTF8(decoded).trim();
-                //[organization:9][code:22][encoder:22][executive:22][chief:22]PROFILED:[role:#]:[info]
-                const profileInfo = /^(?<organization>.{9})(?<code>.{22})(?<encoder>.{22})(?<executive>.{22})(?<chief>.{22})PROFILED:(?<role>[^:]+):(?<info>.*)/
+                //[organization:9][code:22][encoder:22][executive:22][chief:22]PROFILED:[role:#]:[extra]
+                const profileInfo = /^(?<organization>.{9})(?<code>.{22})(?<encoder>.{22})(?<executive>.{22})(?<chief>.{22})PROFILED:(?<role>[^:]+):(?<extra>.*)/
                     .exec(profiledKey);
                 if (!profileInfo || !profileInfo.groups) {
                     throw new ProfilerException('Invalid Profile', 403);
