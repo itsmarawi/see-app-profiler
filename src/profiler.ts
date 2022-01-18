@@ -403,7 +403,7 @@ export abstract class Profiler<P extends EveryProfile> {
                 profile.firstName.toUpperCase()
                 + profile.middleName[0].toUpperCase()
                 + profile.lastName.toUpperCase()
-                + profile.birthDate
+                + mask.substring(5)
                 + profile.kind
             )).padEnd(mask.length, mask)
             }${genderPart}${birthMatch[1] + birthMatch[2] + birthMatch[3].substr(-2)
