@@ -198,7 +198,7 @@ export abstract class Profiler<P extends EveryProfile> {
         if (profile.organization != orgCode) {
             throw new ProfilerException('Cannot activate across-organization', 400);
         }
-
+        this.encodeCodeName(profile);
         let activationKey = orgCode + profile.code + 'ACTIVATE:' + profile.role;
         let encrypted = '=';
         do {
@@ -230,7 +230,7 @@ export abstract class Profiler<P extends EveryProfile> {
         if (!secretKey) {
             throw new ProfilerException('No Keys', 424);
         }
-
+        this.encodeCodeName(profile);
         let activationKey = orgCode + profile.code + supervisor.code + 'ACTIVATE:' + profile.role;
         let encrypted = '=';
         do {
@@ -268,6 +268,7 @@ export abstract class Profiler<P extends EveryProfile> {
         if (!secretKey) {
             throw new ProfilerException('No Keys', 424);
         }
+        this.encodeCodeName(profile);
         let activationKey = orgCode + profile.code + profile.executive.code + 'ACTIVATE:' + profile.kind;
         let encrypted = '=';
         do {
