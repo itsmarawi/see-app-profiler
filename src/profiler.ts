@@ -68,7 +68,7 @@ export abstract class Profiler<P extends EveryProfile> {
                 const decoded = nacl.sign.open(
                     NaclUtil.decodeBase64(activation),
                     pubKey);
-                if (!decoded) throw new ProfilerException('permission-denied', 403);
+                if (!decoded) throw new ProfilerException('permission-denied-wrong-pub-Key', 403);
                 this.encodeCodeName(profile);
                 const activationKey = NaclUtil.encodeUTF8(decoded).trim();
                 //[Org:9][ProfileCodeName:22]ACTIVATE:[ROLE:#]
@@ -78,7 +78,7 @@ export abstract class Profiler<P extends EveryProfile> {
                         || profile.code !== activationInfo.groups['ProfileCodeName']
                         || (profile.kind == 'executive' && profile.role !== 'chief')
                         || (profile.kind == 'executive' && profile.role !== activationInfo.groups['Role']))) {
-                    throw new ProfilerException('permission-denied', 403);
+                    throw new ProfilerException('permission-denied-wrong-activation', 403);
                 }
             } catch (error) {
                 throw new ProfilerException('invalid-activation:' + error, 403);
