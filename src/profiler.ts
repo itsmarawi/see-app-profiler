@@ -335,6 +335,7 @@ export abstract class Profiler<P extends EveryProfile> {
         if (!secretKey) {
             throw new ProfilerException('No Keys', 424);
         }
+        this.encodeCodeName(profile);
         let profileKey = orgCode + profile.code + encoder.code 
             + 'PROFILED:' + profile.kind + ':' + String(extraInfo);
         let encrypted = '=';
